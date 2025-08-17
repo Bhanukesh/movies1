@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, X, SlidersHorizontal } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -31,13 +31,21 @@ const SORT_OPTIONS = [
 
 export function MovieFilters({ filters, onFiltersChange, className }: MovieFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const filtersRef = useRef(filters);
   
+  // Keep ref up to date
+  useEffect(() => {
+    filtersRef.current = filters;
+  }, [filters]);
+  
+  const handleSearchChange = useCallback((search: string) => {
+    onFiltersChange({ ...filtersRef.current, search: search || undefined, page: 1 });
+  }, [onFiltersChange]);
+
   const { searchTerm, updateSearchTerm, isSearching } = useDebouncedSearch(
     filters.search || '',
     300,
-    useCallback((search: string) => {
-      onFiltersChange({ ...filters, search: search || undefined, page: 1 });
-    }, [filters, onFiltersChange])
+    handleSearchChange
   );
 
   const handleGenreToggle = (genre: string) => {

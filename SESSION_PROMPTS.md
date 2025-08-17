@@ -59,6 +59,21 @@ Add the RTK query files to enhanced. And delete all the todos files from @web/
 Build the frontend by creating a Home page with debounced search, filters (genres, year, rating, sort), pagination, and URL query syncing; add a Movie Detail page with edit and delete actions; implement a reusable MovieForm using Zod + React Hook Form for create and update flows with optimistic updates and toasts; support delete with confirmation and rollback; add a Favorites feature with Redux + localStorage, including a dedicated Favorites page; polish the UX with loading skeletons, empty states, error boundaries, retry buttons, virtualization for large lists, and efficient re-renders; finally, write Jest + React Testing Library tests for search, filters, pagination, and optimistic updates, and produce a README with prerequisites, env vars, run commands, and CSV-backed POC limitations. And also, create a Readme.MD folder that has all the prompts that I gave you for this session.
 ```
 
+### 9. Application Testing and Bug Fixes
+```
+check if the application is working or not. I still see the Product Inventory API and Prouducts Homepage, address that issue next.
+```
+
+### 10. React Infinite Loop Fix
+```
+Maximum update depth exceeded. This can happen when a component repeatedly calls setState inside componentWillUpdate or componentDidUpdate. React limits the number of nested updates to prevent infinite loops. Fix this error, do not test it.
+```
+
+### 11. Documentation Cleanup
+```
+Read the @PRD.md and @README.md, remove the file that has least significance and importance after that update the @SESSION_PROMPTS.md
+```
+
 ---
 
 ## 📊 Development Progress Breakdown
@@ -84,6 +99,12 @@ Build the frontend by creating a Home page with debounced search, filters (genre
 - **Movie Management**: CRUD operations with optimistic updates
 - **Favorites System**: Redux + localStorage integration
 - **UI/UX Polish**: Loading states, error boundaries, responsive design
+
+### Phase 5: Bug Fixes and Optimization
+- **API Branding**: Fixed "Product Inventory API" references in Swagger UI
+- **React Infinite Loop**: Resolved setState loop in MovieFilters component
+- **URL Synchronization**: Fixed infinite re-render issues with URL params
+- **Documentation**: Removed redundant PRD.md, updated session prompts
 
 ---
 
@@ -138,6 +159,14 @@ Build the frontend by creating a Home page with debounced search, filters (genre
 1. Separate forms → Code duplication
 2. Conditional schema validation → Type errors
 3. Runtime field checking → Robust solution
+
+### Problem 4: React Infinite Loop
+**Initial Issue**: "Maximum update depth exceeded" error in Next.js frontend
+**Solution Evolution**:
+1. Identified dependency loop in MovieFilters useCallback → Used refs for stable callbacks
+2. URL sync causing re-renders → Temporarily disabled URL sync for debugging
+3. API failures triggering error loops → Replaced with mock data
+4. Final fix: Stable event handlers with useCallback and proper dependency management
 
 ---
 
