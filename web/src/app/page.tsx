@@ -4,7 +4,7 @@ import { useEffect, useState, Suspense, useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Toaster } from 'sonner';
 
-// import { useGetMoviesQuery } from '@/store/api';
+import { useGetMoviesQuery } from '@/store/api';
 import { hydrateFavorites } from '@/store/slices/favorites';
 import { useUrlSync, type MovieFilters } from '@/hooks/useUrlSync';
 import { MovieFilters as MovieFiltersComponent } from '@/components/movies/MovieFilters';
@@ -37,59 +37,28 @@ function HomePage() {
     ...(filters.ratingTo && { rating_to: filters.ratingTo }),
   };
 
-  // Mock data for development when API isn't available
-  const mockMoviesResponse = {
-    items: [
-      {
-        id: 1,
-        title: "Sample Movie 1",
-        overview: "This is a sample movie for testing the UI without API",
-        genres: [{ name: "Action" }, { name: "Adventure" }],
-        release_date: "2023-01-01",
-        vote_average: 8.5,
-        popularity: 1000,
-        is_favorite: false,
-        personal_rating: null,
-        personal_notes: null
-      },
-      {
-        id: 2,
-        title: "Sample Movie 2", 
-        overview: "Another sample movie for UI testing",
-        genres: [{ name: "Comedy" }, { name: "Drama" }],
-        release_date: "2023-06-15",
-        vote_average: 7.2,
-        popularity: 850,
-        is_favorite: true,
-        personal_rating: 9,
-        personal_notes: "Great movie!"
-      }
-    ],
-    total: 2,
-    page: 1,
-    size: 20,
-    pages: 1
-  };
-
-  // Use mock data instead of API for now
-  const moviesResponse = mockMoviesResponse;
-  const isLoading = false;
-  const isError = false;
-  const refetch = () => console.log('Refetch called');
+  const { data: moviesResponse, isLoading, isError, refetch } = useGetMoviesQuery(apiQuery);
 
   const handleFiltersChange = useCallback((newFilters: MovieFilters) => {
     setFilters(newFilters);
-    // Temporarily disable URL sync to debug infinite loop
-    // updateUrl(newFilters, true);
-  }, []);
+    updateUrl(newFilters, true);
+  }, [updateUrl]);
 
   const handlePageChange = useCallback((page: number) => {
-    setFilters(current => ({ ...current, page }));
-  }, []);
+    setFilters(current => {
+      const newFilters = { ...current, page };
+      updateUrl(newFilters, true);
+      return newFilters;
+    });
+  }, [updateUrl]);
 
   const handlePageSizeChange = useCallback((size: number) => {
-    setFilters(current => ({ ...current, size, page: 1 }));
-  }, []);
+    setFilters(current => {
+      const newFilters = { ...current, size, page: 1 };
+      updateUrl(newFilters, true);
+      return newFilters;
+    });
+  }, [updateUrl]);
 
   // Sort movies client-side based on filters
   const sortedMovies = moviesResponse?.items ? [...moviesResponse.items].sort((a, b) => {

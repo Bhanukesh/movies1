@@ -1,6 +1,6 @@
 # Movie Collection App
 
-A powerful, full-stack movie collection application built with **Next.js 15**, **FastAPI**, and **CSV-based data storage**. Discover, organize, rate, and manage your favorite movies with a modern, responsive interface.
+A full-stack movie management application with **Next.js 15**, **FastAPI**, and **CSV-based data storage**. Search, filter, rate, and organize your favorite movies.
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.x-black?logo=next.js)
 ![React](https://img.shields.io/badge/React-19.x-blue?logo=react)
@@ -10,309 +10,151 @@ A powerful, full-stack movie collection application built with **Next.js 15**, *
 
 ## ✨ Features
 
+### 🎬 **Movie Management**
+- **4,808 movies** loaded from comprehensive CSV database
+- **CRUD operations** with real-time updates
+- **Advanced search** across titles, cast, crew, and descriptions
+- **Smart filtering** by genre, year, rating, runtime, and language
+- **Personal ratings** and notes system
+
 ### 🔍 **Search & Discovery**
-- **Debounced search** with real-time filtering
-- **Advanced filters**: Genre, year range, rating range, runtime
-- **Smart sorting** by title, year, rating, or popularity
-- **URL synchronization** for shareable filtered views
+- **Debounced search** with instant results
+- **Multi-criteria filtering** with URL synchronization
+- **Pagination** for efficient browsing
+- **Sorting** by title, year, rating, or popularity
 
-### 📱 **Modern UI/UX**
-- **Responsive design** that works on all devices
-- **Loading skeletons** and **empty states** for better UX
-- **Error boundaries** with retry functionality
-- **Toast notifications** for user feedback
-- **Grid/List view** toggle for flexible browsing
-
-### ⭐ **Movie Management**
-- **CRUD operations** with optimistic updates
-- **Personal ratings** (1-10 scale) and notes
+### ⭐ **User Experience**
 - **Favorites system** with localStorage persistence
-- **Detailed movie pages** with comprehensive information
-- **Form validation** using Zod schemas
-
-### 🚀 **Performance**
-- **Pagination** with configurable page sizes
-- **Efficient re-renders** using React optimizations
-- **Client-side caching** via RTK Query
-- **Chunked CSV loading** to prevent timeouts
-
-### 🎯 **Developer Experience**
+- **Responsive design** for all device sizes
+- **Loading states** and error handling
 - **Type-safe** throughout with TypeScript
-- **Auto-generated API client** from OpenAPI specs
-- **Redux Toolkit** for predictable state management
-- **Comprehensive error handling** and validation
 
-## 🏗️ Architecture
-
-### Backend (FastAPI)
-- **CQRS pattern** with MediatR-style handlers
-- **Pydantic models** for data validation
-- **CSV-based storage** with efficient loading
-- **OpenAPI documentation** auto-generation
-- **Comprehensive filtering and pagination**
-
-### Frontend (Next.js)
-- **App Router** with Server Components
-- **RTK Query** for API state management
-- **Redux Toolkit** for local state
-- **Shadcn/ui** components with Tailwind CSS
-- **React Hook Form** with Zod validation
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-
-- **Node.js** 18+ and **pnpm** 9+
+- **Node.js** 18+ and **pnpm**
 - **Python** 3.11+ with **pip**
-- **Git** for version control
 
-### Environment Setup
+### Setup & Run
 
-1. **Clone the repository**
+1. **Clone and navigate**
    ```bash
    git clone <repository-url>
    cd movies1
    ```
 
-2. **Backend Setup (FastAPI)**
+2. **Start the API** (Terminal 1)
    ```bash
    cd PythonApi
-   
-   # Create virtual environment
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   
-   # Install dependencies
    pip install -r requirements.txt
-   
-   # Start the API server
-   uvicorn main:app --reload --port 8000
+   python run_app.py
    ```
 
-3. **Frontend Setup (Next.js)**
+3. **Start the frontend** (Terminal 2)
    ```bash
    cd web
-   
-   # Install dependencies
    pnpm install
-   
-   # Generate API client from OpenAPI spec
-   pnpm generate-api
-   
-   # Start development server
    pnpm dev
    ```
 
-### Development Commands
+4. **Access the application**
+   - **Frontend**: http://localhost:3000
+   - **API Documentation**: http://localhost:8000/swagger
 
-#### Backend (FastAPI)
-```bash
-# Start server with auto-reload
-uvicorn main:app --reload --port 8000
+## 🏗️ Architecture
 
-# View API documentation
-# Navigate to http://localhost:8000/docs
+### Backend (FastAPI)
+- **CSV Database**: 4,808 movies from `Semantic_Recent.csv`
+- **Chunked loading** prevents memory issues and timeouts
+- **RESTful API** with comprehensive filtering and pagination
+- **Auto-generated OpenAPI** documentation
 
-# Run tests
-pytest tests/ -v
+### Frontend (Next.js)
+- **App Router** with Server Components
+- **RTK Query** for API state management
+- **Redux Toolkit** for local state (favorites)
+- **Zod validation** with React Hook Form
+- **Shadcn/ui** components with Tailwind CSS
 
-# Format code
-black . && isort .
+## 📊 API Endpoints
 
-# Type checking
-mypy .
-```
-
-#### Frontend (Next.js)
-```bash
-# Development server
-pnpm dev
-
-# Build for production
-pnpm build
-
-# Start production server
-pnpm start
-
-# Lint code
-pnpm lint
-
-# Regenerate API client
-pnpm generate-api
-
-# Type checking
-pnpm type-check
-```
-
-## 📊 Data Source
-
-This application uses the **Semantic_Recent.csv** file as its database, which contains:
-- **4,800+ movies** with comprehensive metadata
-- **1,275 columns** including cast, crew, genres, keywords
-- **Production details**, ratings, and release information
-
-### CSV Structure
-The CSV includes fields like:
-- Basic info: `title`, `overview`, `release_date`, `runtime`
-- Ratings: `vote_average`, `vote_count`, `popularity`
-- People: `cast`, `crew` (JSON arrays)
-- Categories: `genres`, `keywords` (JSON arrays)
-- Production: `production_companies`, `production_countries`
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create `.env.local` in the `web` directory:
-```env
-# API Configuration
-NEXT_PUBLIC_API_URL=http://localhost:8000
-
-# Optional: Analytics
-NEXT_PUBLIC_GA_ID=your-ga-id
-```
-
-### API Configuration
-
-The FastAPI backend auto-configures from the CSV file location. Key settings:
-
-- **Chunk size**: 200 rows for optimal loading performance
-- **Pagination**: Default 20 items per page (configurable 10-100)
-- **Search**: Full-text search across title, overview, cast, crew
-- **Timeout handling**: Lazy loading prevents startup timeouts
+- `GET /api/Movies` - Paginated movies with filtering
+- `GET /api/Movies/search` - Text search across all fields
+- `GET /api/Movies/favorites` - User's favorite movies
+- `GET /api/Movies/{id}` - Individual movie details
+- `PUT /api/Movies/{id}` - Update movie (ratings, notes)
+- `POST /api/Movies/{id}/favorite` - Toggle favorite status
+- `GET /api/stats` - Database statistics
 
 ## 📁 Project Structure
 
 ```
 movies1/
-├── PythonApi/               # FastAPI backend
-│   ├── main.py             # API entry point
-│   ├── models.py           # Pydantic models
-│   ├── database.py         # CSV data access layer
-│   ├── requirements.txt    # Python dependencies
-│   └── tests/              # Backend tests
-├── web/                    # Next.js frontend
-│   ├── src/
-│   │   ├── app/            # App Router pages
-│   │   ├── components/     # Reusable UI components
-│   │   ├── store/          # Redux store and API
-│   │   ├── hooks/          # Custom React hooks
-│   │   └── lib/            # Utilities and validations
-│   ├── package.json        # Frontend dependencies
-│   └── openapi-config.ts   # API generation config
-├── Semantic_Recent.csv     # Movie database (CSV)
-└── README.md              # This file
+├── PythonApi/              # FastAPI backend
+│   ├── main.py            # API endpoints
+│   ├── models.py          # Pydantic models
+│   ├── database.py        # CSV data layer
+│   └── requirements.txt   # Dependencies
+├── web/                   # Next.js frontend
+│   ├── src/app/          # App Router pages
+│   ├── src/components/   # UI components
+│   ├── src/store/        # Redux + RTK Query
+│   └── package.json      # Dependencies
+├── Semantic_Recent.csv    # Movie database (4,808 movies)
+└── README.md             # This file
 ```
 
-## 🧪 Testing
+## 🎯 Key Features Implemented
 
-### Running Tests
+✅ **Full-text search** across 4,808 movies  
+✅ **Advanced filtering** with 12+ filter criteria  
+✅ **Real-time pagination** with configurable page sizes  
+✅ **Favorites management** with local persistence  
+✅ **Personal ratings** and notes system  
+✅ **Responsive UI** with loading states and error handling  
+✅ **Type-safe** API integration with auto-generated client  
+✅ **URL synchronization** for shareable search results  
 
+## 🔧 Development
+
+### Backend Commands
 ```bash
-# Backend tests
 cd PythonApi
-pytest tests/ -v --cov=.
-
-# Frontend tests (when implemented)
-cd web
-pnpm test
-pnpm test:coverage
+python run_app.py              # Start server
+python generate_api_specification.py  # Update OpenAPI spec
+pytest tests/                  # Run tests
 ```
 
-### Test Coverage
-
-The application includes tests for:
-- **API endpoints** (CRUD operations, filtering, pagination)
-- **Data validation** (Pydantic models, edge cases)
-- **CSV loading** (chunked processing, error handling)
-- **Search functionality** (text search, filters)
-
-## 🚀 Deployment
-
-### Production Build
-
+### Frontend Commands
 ```bash
-# Backend
-cd PythonApi
-pip install -r requirements.txt
-uvicorn main:app --host 0.0.0.0 --port 8000
-
-# Frontend
 cd web
-pnpm build
-pnpm start
+pnpm dev                       # Start dev server
+pnpm build                     # Build for production
+pnpm lint                      # Lint code
+pnpm generate-api              # Update API client
 ```
 
-### Docker Deployment
+## ⚠️ Current Limitations
 
-```dockerfile
-# Backend Dockerfile
-FROM python:3.11-slim
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-COPY . .
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+This is a **CSV-based proof of concept** with these constraints:
+- **In-memory storage**: Changes don't persist to CSV
+- **Single user**: No authentication or multi-user support
+- **Performance**: Large dataset may cause slower initial load
+- **Concurrency**: No concurrent user support
 
-# Frontend Dockerfile
-FROM node:18-alpine
-WORKDIR /app
-COPY package.json pnpm-lock.yaml ./
-RUN npm install -g pnpm && pnpm install
-COPY . .
-RUN pnpm build
-CMD ["pnpm", "start"]
-```
+## 🚀 Production Recommendations
 
-## ⚠️ Limitations & Considerations
-
-### CSV-Based POC Limitations
-
-This is a **Proof of Concept** using CSV storage with inherent limitations:
-
-1. **Data Persistence**: Movie updates persist only in memory during runtime
-2. **Concurrency**: No concurrent user support (single-instance)
-3. **Performance**: Large CSV files may cause initial loading delays
-4. **Scalability**: Not suitable for production with multiple users
-5. **Data Integrity**: No ACID transactions or referential integrity
-
-### Production Recommendations
-
-For production deployment, consider migrating to:
-- **Database**: PostgreSQL, MongoDB, or SQLite for data persistence
+For production deployment, consider:
+- **Database**: PostgreSQL or MongoDB for persistence
 - **Caching**: Redis for improved performance
-- **File Storage**: Cloud storage for movie posters/metadata
-- **Authentication**: User management and personalized collections
+- **Authentication**: User accounts and personalized collections
+- **File Storage**: Cloud storage for movie assets
 - **Real-time**: WebSocket support for live updates
-
-## 🤝 Contributing
-
-1. **Fork** the repository
-2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
-3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
-4. **Push** to the branch (`git push origin feature/amazing-feature`)
-5. **Open** a Pull Request
-
-### Development Guidelines
-
-- Follow **TypeScript** best practices
-- Use **conventional commits** for clear history
-- Add **tests** for new functionality
-- Update **documentation** for API changes
-- Ensure **type safety** throughout
 
 ## 📄 License
 
-This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
-
-## 🙏 Acknowledgments
-
-- **TMDB** for movie data and inspiration
-- **Shadcn/ui** for beautiful UI components
-- **FastAPI** for excellent API development experience
-- **Next.js** for powerful React framework
-- **Redux Toolkit** for predictable state management
+MIT License - see [LICENSE](LICENSE) file for details.
 
 ---
 
-**Built with ❤️ using modern web technologies**
+**Built with modern web technologies for efficient movie collection management**
