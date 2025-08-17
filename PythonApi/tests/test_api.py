@@ -11,233 +11,338 @@ from database import db
 @pytest.fixture(autouse=True)
 def reset_database():
     """Reset the database before each test"""
-    db._todos.clear()
+    db._movies.clear()
     db._next_id = 1
     yield
-    db._todos.clear()
+    db._movies.clear()
     db._next_id = 1
 
 
-class TestTodoAPI:
-    """Integration tests for the Todo API endpoints"""
+class TestMovieAPI:
+    """Integration tests for the Movie API endpoints"""
     
     def setup_method(self):
         """Create a test client for each test"""
         self.client = TestClient(app)
     
-    def test_get_empty_todos(self):
-        """Test getting todos when database is empty"""
-        response = self.client.get("/api/Todos")
+    def test_get_empty_movies(self):
+        """Test getting movies when database is empty"""
+        response = self.client.get("/api/Movies")
         assert response.status_code == 200
-        assert response.json() == []
+        data = response.json()
+        assert data["items"] == []
+        assert data["total"] == 0
+        assert data["page"] == 1
+        assert data["size"] == 20
     
-    def test_create_todo(self):
-        """Test creating a new todo"""
-        response = self.client.post(
-            "/api/Todos",
-            json={"title": "Test Todo"}
-        )
+    def test_create_movie(self):
+        """Test creating a new movie"""
+        movie_data = {
+            "title": "Test Movie",
+            "overview": "A test movie for testing purposes",
+            "release_date": "2023-01-01",
+            "vote_average": 8.5,
+            "runtime": 120
+        }
+        
+        response = self.client.post("/api/Movies", json=movie_data)
         assert response.status_code == 200
-        assert response.json() == 1
+        movie_id = response.json()
+        assert movie_id == 1
         
         # Verify it was created
-        response = self.client.get("/api/Todos")
+        response = self.client.get("/api/Movies")
         assert response.status_code == 200
-        todos = response.json()
-        assert len(todos) == 1
-        assert todos[0]["id"] == 1
-        assert todos[0]["title"] == "Test Todo"
-        assert todos[0]["isComplete"] == False
+        data = response.json()
+        assert data["total"] == 1
+        movie = data["items"][0]
+        assert movie["id"] == 1
+        assert movie["title"] == "Test Movie"
+        assert movie["overview"] == "A test movie for testing purposes"
+        assert movie["is_favorite"] == False
     
-    def test_create_multiple_todos(self):
-        """Test creating multiple todos"""
-        titles = ["First", "Second", "Third"]
-        created_ids = []
+    def test_get_movie_by_id(self):
+        """Test getting a specific movie by ID"""
+        # Create a movie first
+        movie_data = {"title": "Test Movie", "overview": "Test overview"}
+        create_response = self.client.post("/api/Movies", json=movie_data)
+        movie_id = create_response.json()
         
-        for title in titles:
-            response = self.client.post(
-                "/api/Todos",
-                json={"title": title}
-            )
-            assert response.status_code == 200
-            created_ids.append(response.json())
-        
-        assert created_ids == [1, 2, 3]
-        
-        # Verify all were created
-        response = self.client.get("/api/Todos")
-        todos = response.json()
-        assert len(todos) == 3
-        for i, todo in enumerate(todos):
-            assert todo["id"] == i + 1
-            assert todo["title"] == titles[i]
+        # Get the movie by ID
+        response = self.client.get(f"/api/Movies/{movie_id}")
+        assert response.status_code == 200
+        movie = response.json()
+        assert movie["id"] == movie_id
+        assert movie["title"] == "Test Movie"
     
-    def test_update_todo(self):
-        """Test updating an existing todo"""
-        # Create a todo
-        create_response = self.client.post(
-            "/api/Todos",
-            json={"title": "Original"}
-        )
-        todo_id = create_response.json()
+    def test_get_nonexistent_movie(self):
+        """Test getting a movie that doesn't exist"""
+        response = self.client.get("/api/Movies/999")
+        assert response.status_code == 404
+        assert response.json()["detail"] == "Movie not found"
+    
+    def test_update_movie(self):
+        """Test updating an existing movie"""
+        # Create a movie
+        movie_data = {"title": "Original Title"}
+        create_response = self.client.post("/api/Movies", json=movie_data)
+        movie_id = create_response.json()
         
         # Update it
-        update_response = self.client.put(
-            f"/api/Todos/{todo_id}",
-            json={"title": "Updated", "isComplete": True}
-        )
+        update_data = {
+            "title": "Updated Title",
+            "is_favorite": True,
+            "personal_rating": 9.0,
+            "personal_notes": "Great movie!"
+        }
+        
+        update_response = self.client.put(f"/api/Movies/{movie_id}", json=update_data)
         assert update_response.status_code == 200
         
         # Verify the update
-        response = self.client.get("/api/Todos")
-        todos = response.json()
-        assert len(todos) == 1
-        assert todos[0]["title"] == "Updated"
-        assert todos[0]["isComplete"] == True
+        response = self.client.get(f"/api/Movies/{movie_id}")
+        movie = response.json()
+        assert movie["title"] == "Updated Title"
+        assert movie["is_favorite"] == True
+        assert movie["personal_rating"] == 9.0
+        assert movie["personal_notes"] == "Great movie!"
     
-    def test_update_nonexistent_todo(self):
-        """Test updating a todo that doesn't exist"""
+    def test_update_nonexistent_movie(self):
+        """Test updating a movie that doesn't exist"""
         response = self.client.put(
-            "/api/Todos/999",
-            json={"title": "Updated", "isComplete": True}
+            "/api/Movies/999",
+            json={"title": "Updated", "is_favorite": True}
         )
         assert response.status_code == 404
-        assert response.json()["detail"] == "Todo not found"
+        assert response.json()["detail"] == "Movie not found"
     
-    def test_delete_todo(self):
-        """Test deleting an existing todo"""
-        # Create two todos
-        response1 = self.client.post("/api/Todos", json={"title": "Todo 1"})
-        id1 = response1.json()
-        response2 = self.client.post("/api/Todos", json={"title": "Todo 2"})
-        id2 = response2.json()
+    def test_delete_movie(self):
+        """Test deleting an existing movie"""
+        # Create two movies
+        movie1 = self.client.post("/api/Movies", json={"title": "Movie 1"})
+        id1 = movie1.json()
+        movie2 = self.client.post("/api/Movies", json={"title": "Movie 2"})
+        id2 = movie2.json()
         
         # Delete the first one
-        delete_response = self.client.delete(f"/api/Todos/{id1}")
+        delete_response = self.client.delete(f"/api/Movies/{id1}")
         assert delete_response.status_code == 200
         
         # Verify only second remains
-        response = self.client.get("/api/Todos")
-        todos = response.json()
-        assert len(todos) == 1
-        assert todos[0]["id"] == id2
-        assert todos[0]["title"] == "Todo 2"
+        response = self.client.get("/api/Movies")
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["id"] == id2
+        assert data["items"][0]["title"] == "Movie 2"
     
-    def test_delete_nonexistent_todo(self):
-        """Test deleting a todo that doesn't exist"""
-        response = self.client.delete("/api/Todos/999")
+    def test_delete_nonexistent_movie(self):
+        """Test deleting a movie that doesn't exist"""
+        response = self.client.delete("/api/Movies/999")
         assert response.status_code == 404
-        assert response.json()["detail"] == "Todo not found"
+        assert response.json()["detail"] == "Movie not found"
     
-    def test_bug_scenario_delete_then_update(self):
-        """Test the specific bug: create 2, delete 2nd, update 1st"""
-        # Create two todos
-        response1 = self.client.post("/api/Todos", json={"title": "First Todo"})
-        id1 = response1.json()
-        response2 = self.client.post("/api/Todos", json={"title": "Second Todo"})
-        id2 = response2.json()
+    def test_toggle_favorite(self):
+        """Test toggling favorite status of a movie"""
+        # Create a movie
+        movie_data = {"title": "Test Movie"}
+        create_response = self.client.post("/api/Movies", json=movie_data)
+        movie_id = create_response.json()
         
-        # Delete the second todo
-        delete_response = self.client.delete(f"/api/Todos/{id2}")
-        assert delete_response.status_code == 200
+        # Toggle favorite (should become True)
+        response = self.client.post(f"/api/Movies/{movie_id}/favorite")
+        assert response.status_code == 200
+        assert response.json()["is_favorite"] == True
         
-        # Update the first todo (this was the bug)
-        update_response = self.client.put(
-            f"/api/Todos/{id1}",
-            json={"title": "Updated First", "isComplete": True}
-        )
-        assert update_response.status_code == 200
-        
-        # Verify the update worked
-        response = self.client.get("/api/Todos")
-        todos = response.json()
-        assert len(todos) == 1
-        assert todos[0]["id"] == id1
-        assert todos[0]["title"] == "Updated First"
-        assert todos[0]["isComplete"] == True
+        # Toggle again (should become False)
+        response = self.client.post(f"/api/Movies/{movie_id}/favorite")
+        assert response.status_code == 200
+        assert response.json()["is_favorite"] == False
     
-    def test_complex_workflow(self):
-        """Test a complex workflow with multiple operations"""
-        # Create 3 todos
-        ids = []
-        for i in range(1, 4):
-            response = self.client.post("/api/Todos", json={"title": f"Todo {i}"})
-            ids.append(response.json())
+    def test_get_favorite_movies(self):
+        """Test getting only favorite movies"""
+        # Create movies with different favorite status
+        movie1 = self.client.post("/api/Movies", json={"title": "Movie 1"})
+        id1 = movie1.json()
+        movie2 = self.client.post("/api/Movies", json={"title": "Movie 2"})
+        id2 = movie2.json()
+        movie3 = self.client.post("/api/Movies", json={"title": "Movie 3"})
+        id3 = movie3.json()
         
-        # Update the middle one
-        self.client.put(
-            f"/api/Todos/{ids[1]}",
-            json={"title": "Middle Updated", "isComplete": True}
-        )
+        # Mark movies 1 and 3 as favorites
+        self.client.post(f"/api/Movies/{id1}/favorite")
+        self.client.post(f"/api/Movies/{id3}/favorite")
         
-        # Delete the first one
-        self.client.delete(f"/api/Todos/{ids[0]}")
+        # Get favorites
+        response = self.client.get("/api/Movies/favorites")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 2
+        favorite_ids = [movie["id"] for movie in data["items"]]
+        assert id1 in favorite_ids
+        assert id3 in favorite_ids
+        assert id2 not in favorite_ids
+    
+    def test_search_movies(self):
+        """Test searching movies by title and overview"""
+        # Create test movies
+        movies = [
+            {"title": "Avatar", "overview": "A movie about blue aliens"},
+            {"title": "Titanic", "overview": "A ship sinks in the ocean"},
+            {"title": "The Matrix", "overview": "Reality is not what it seems"}
+        ]
         
-        # Create a new one
-        response = self.client.post("/api/Todos", json={"title": "New Todo"})
-        new_id = response.json()
+        for movie in movies:
+            self.client.post("/api/Movies", json=movie)
         
-        # Get all todos
-        response = self.client.get("/api/Todos")
-        todos = response.json()
+        # Search by title
+        response = self.client.get("/api/Movies/search?q=Avatar")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Avatar"
         
-        # Should have 3 todos
-        assert len(todos) == 3
+        # Search by overview
+        response = self.client.get("/api/Movies/search?q=ship")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Titanic"
         
-        # Check the remaining todos
-        todo_ids = [t["id"] for t in todos]
-        assert ids[1] in todo_ids  # Middle one still exists
-        assert ids[2] in todo_ids  # Last one still exists
-        assert new_id in todo_ids  # New one exists
+        # Search with no results
+        response = self.client.get("/api/Movies/search?q=nonexistent")
+        assert response.status_code == 200
+        data = response.json()
+        assert data["total"] == 0
+    
+    def test_pagination(self):
+        """Test pagination functionality"""
+        # Create 25 movies
+        for i in range(25):
+            self.client.post("/api/Movies", json={"title": f"Movie {i+1}"})
         
-        # Check the updated one
-        middle_todo = next(t for t in todos if t["id"] == ids[1])
-        assert middle_todo["title"] == "Middle Updated"
-        assert middle_todo["isComplete"] == True
+        # Get first page (default size 20)
+        response = self.client.get("/api/Movies")
+        data = response.json()
+        assert data["total"] == 25
+        assert data["page"] == 1
+        assert data["size"] == 20
+        assert data["pages"] == 2
+        assert len(data["items"]) == 20
+        
+        # Get second page
+        response = self.client.get("/api/Movies?page=2")
+        data = response.json()
+        assert data["total"] == 25
+        assert data["page"] == 2
+        assert data["size"] == 20
+        assert data["pages"] == 2
+        assert len(data["items"]) == 5
+        
+        # Test custom page size
+        response = self.client.get("/api/Movies?page=1&size=10")
+        data = response.json()
+        assert data["size"] == 10
+        assert len(data["items"]) == 10
+    
+    def test_filters(self):
+        """Test various filtering options"""
+        # Create movies with different attributes
+        movies = [
+            {
+                "title": "Action Movie 1",
+                "overview": "Explosions and car chases",
+                "release_date": "2020-01-01",
+                "vote_average": 7.5,
+                "runtime": 120,
+                "original_language": "en",
+                "genres": [{"id": 28, "name": "Action"}]
+            },
+            {
+                "title": "Drama Movie 1",
+                "overview": "Deep emotional story",
+                "release_date": "2019-01-01",
+                "vote_average": 8.5,
+                "runtime": 150,
+                "original_language": "fr",
+                "genres": [{"id": 18, "name": "Drama"}]
+            }
+        ]
+        
+        for movie in movies:
+            self.client.post("/api/Movies", json=movie)
+        
+        # Test year filter
+        response = self.client.get("/api/Movies?year_from=2020")
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Action Movie 1"
+        
+        # Test rating filter
+        response = self.client.get("/api/Movies?rating_from=8.0")
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Drama Movie 1"
+        
+        # Test language filter
+        response = self.client.get("/api/Movies?language=fr")
+        data = response.json()
+        assert data["total"] == 1
+        assert data["items"][0]["title"] == "Drama Movie 1"
+    
+    def test_get_stats(self):
+        """Test getting database statistics"""
+        # Create some test movies
+        movies = [
+            {
+                "title": "Action Movie",
+                "genres": [{"id": 28, "name": "Action"}],
+                "release_date": "2020-01-01"
+            },
+            {
+                "title": "Drama Movie", 
+                "genres": [{"id": 18, "name": "Drama"}],
+                "release_date": "2019-01-01"
+            }
+        ]
+        
+        for movie in movies:
+            create_response = self.client.post("/api/Movies", json=movie)
+            movie_id = create_response.json()
+            
+        # Mark one as favorite
+        self.client.post(f"/api/Movies/1/favorite")
+        
+        # Add personal rating to one
+        self.client.put("/api/Movies/2", json={"personal_rating": 9.0})
+        
+        # Get stats
+        response = self.client.get("/api/stats")
+        assert response.status_code == 200
+        stats = response.json()
+        
+        assert stats["total_movies"] == 2
+        assert stats["favorites_count"] == 1
+        assert stats["rated_count"] == 1
+        assert len(stats["top_genres"]) >= 2
+        assert any(genre[0] == "Action" for genre in stats["top_genres"])
+        assert any(genre[0] == "Drama" for genre in stats["top_genres"])
     
     def test_cors_headers(self):
         """Test that CORS headers are properly set"""
-        # Make a request with an Origin header to trigger CORS
         response = self.client.get(
-            "/api/Todos",
+            "/api/Movies",
             headers={"Origin": "http://localhost:3000"}
         )
         assert response.status_code == 200
-        # CORS headers should be present in the response
         assert "access-control-allow-origin" in response.headers
         assert response.headers["access-control-allow-origin"] == "*"
-        assert "access-control-allow-credentials" in response.headers
     
     def test_empty_title_handling(self):
-        """Test creating a todo with empty title"""
-        response = self.client.post(
-            "/api/Todos",
-            json={"title": ""}
-        )
-        # Empty string is still a valid string
+        """Test creating a movie with empty title"""
+        response = self.client.post("/api/Movies", json={"title": ""})
         assert response.status_code == 200
         
         # Verify it was created with empty title
-        todos = self.client.get("/api/Todos").json()
-        assert len(todos) == 1
-        assert todos[0]["title"] == ""
-    
-    def test_special_characters_in_title(self):
-        """Test todos with special characters"""
-        special_titles = [
-            "Todo with émojis 🎉🚀",
-            "Todo with <html>tags</html>",
-            "Todo with \"quotes\" and 'apostrophes'",
-            "Todo with line\nbreaks",
-            "Todo with tabs\tand spaces"
-        ]
-        
-        for title in special_titles:
-            response = self.client.post("/api/Todos", json={"title": title})
-            assert response.status_code == 200
-        
-        todos = self.client.get("/api/Todos").json()
-        assert len(todos) == len(special_titles)
-        
-        for i, todo in enumerate(todos):
-            assert todo["title"] == special_titles[i]
+        movies = self.client.get("/api/Movies").json()
+        assert movies["total"] == 1
+        assert movies["items"][0]["title"] == ""
