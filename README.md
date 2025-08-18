@@ -42,7 +42,7 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
 
 1. **Clone and navigate**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/Bhanukesh/movies1.git
    cd movies1
    ```
 
@@ -69,6 +69,15 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
 5. **Access the application**
    - **Frontend**: http://localhost:3000
    - **API Documentation**: http://localhost:8000/swagger
+
+### ⚡ Quick One-Command Setup
+
+For experienced developers, here's the complete setup in one go:
+
+```bash
+git clone https://github.com/Bhanukesh/movies1.git && cd movies1 && ./setup-dataset.sh && cd PythonApi && pip install -r requirements.txt && python run_app.py &
+cd ../web && pnpm install && pnpm dev
+```
 
 ### 📊 Dataset Options
 
