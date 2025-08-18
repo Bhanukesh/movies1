@@ -11,16 +11,50 @@ DATASET_URL=""
 DATASET_FILE="Semantic_Recent.csv"
 SAMPLE_DATASET_FILE="sample_movies.csv"
 TEMP_FILE="/tmp/Semantic_Recent.csv"
+FULL_DATASET_BACKUP="Semantic_Recent_FULL.csv"  # Backup location for full dataset
 
 # Check if dataset already exists
 if [ -f "$DATASET_FILE" ]; then
-    echo "✅ Dataset already exists: $DATASET_FILE"
-    echo "📊 File size: $(ls -lh $DATASET_FILE | awk '{print $5}')"
-    echo "📈 Movie count: $(tail -n +2 $DATASET_FILE | wc -l) movies"
-    exit 0
+    MOVIE_COUNT=$(tail -n +2 "$DATASET_FILE" | wc -l)
+    FILE_SIZE=$(ls -lh "$DATASET_FILE" | awk '{print $5}')
+    
+    echo "✅ Dataset found: $DATASET_FILE"
+    echo "📊 File size: $FILE_SIZE"
+    echo "📈 Current movie count: $MOVIE_COUNT movies"
+    
+    # Check if this is the sample dataset (10-20 movies) or full dataset (1000+ movies)
+    if [ "$MOVIE_COUNT" -ge 1000 ]; then
+        echo "🎉 Full dataset already installed with $MOVIE_COUNT movies!"
+        echo "🌟 You have access to the complete movie collection!"
+        echo ""
+        echo "🚀 Application is ready to run:"
+        echo ""
+        echo "Backend (Terminal 1):"
+        echo "  cd PythonApi"
+        echo "  python run_app.py"
+        echo ""
+        echo "Frontend (Terminal 2):"
+        echo "  cd web"
+        echo "  pnpm dev"
+        echo ""
+        exit 0
+    else
+        echo "📝 Currently using sample dataset ($MOVIE_COUNT movies)"
+        echo "🔄 This script will upgrade you to the full dataset with 4800+ movies!"
+        echo ""
+        echo "Would you like to upgrade to the full dataset? [Y/n]"
+        read -r response
+        if [[ "$response" =~ ^[Nn]$ ]]; then
+            echo "📋 Keeping sample dataset. You can run this script again to upgrade."
+            exit 0
+        fi
+        echo "🚀 Proceeding with full dataset installation..."
+    fi
+else
+    echo "📂 No dataset found."
 fi
 
-echo "📥 Setting up movie dataset..."
+echo "📥 Installing full movie dataset..."
 
 # Method 1: Download from URL (if available)
 if [ ! -z "$DATASET_URL" ]; then
@@ -45,42 +79,32 @@ if [ ! -z "$DATASET_URL" ]; then
         exit 1
     fi
 else
-    # Method 2: Use sample dataset for development
-    echo "📋 Using Sample Dataset for Development"
-    echo ""
-    if [ -f "$SAMPLE_DATASET_FILE" ]; then
-        echo "📂 Found sample dataset: $SAMPLE_DATASET_FILE"
-        echo "🔄 Copying sample dataset to $DATASET_FILE for development..."
-        cp "$SAMPLE_DATASET_FILE" "$DATASET_FILE"
-        echo "✅ Sample dataset setup complete!"
-        echo ""
-        echo "📝 Note: This is a small sample dataset with 10 popular movies."
-        echo "   For production use, obtain a full dataset and replace $DATASET_FILE"
-        echo ""
-        echo "🔍 For full datasets, check:"
-        echo "- Kaggle (https://www.kaggle.com/datasets)"
-        echo "- The Movie Database (TMDB)"
-        echo "- MovieLens datasets"
-        echo ""
+    # Method 2: Create full dataset from backup or user-provided content
+    echo "🔍 Looking for full dataset content..."
+    
+    # Check if backup exists
+    if [ -f "$FULL_DATASET_BACKUP" ]; then
+        echo "📂 Found full dataset backup: $FULL_DATASET_BACKUP"
+        cp "$FULL_DATASET_BACKUP" "$DATASET_FILE"
+        echo "✅ Full dataset restored from backup!"
     else
-        echo "❌ Error: Sample dataset not found: $SAMPLE_DATASET_FILE"
+        echo "📝 Full dataset setup instructions:"
         echo ""
-        echo "The movie dataset needs to be obtained manually:"
+        echo "To install the full movie dataset (4800+ movies):"
+        echo "1. Obtain a comprehensive movie dataset in CSV format"
+        echo "2. Save it as '$DATASET_FILE' in this directory"
+        echo "3. Run this script again"
         echo ""
-        echo "1. 📂 Download or obtain the movie dataset file"
-        echo "2. 🏷️  Ensure it has the following CSV format:"
-        echo "   - title_y, overview, genres, keywords, tagline, cast, crew, etc."
-        echo "3. 📁 Save it as: $DATASET_FILE"
-        echo "4. ✅ Run this script again to verify the setup"
+        echo "🔍 The CSV should have this format:"
+        echo "   title_y,overview,genres,keywords,tagline,cast,crew,..."
         echo ""
-        echo "Expected format:"
-        echo "title_y,overview,genres,keywords,tagline,cast,crew,production_companies,..."
+        echo "📋 Recommended sources:"
+        echo "   - Kaggle Movie datasets (TMDB 5000, MovieLens, etc.)"
+        echo "   - The Movie Database (TMDB) exports"
+        echo "   - MovieLens datasets"
         echo ""
-        echo "Popular movie datasets can be found on:"
-        echo "- Kaggle (https://www.kaggle.com/datasets)"
-        echo "- The Movie Database (TMDB)"
-        echo "- MovieLens datasets"
-        echo ""
+        echo "⚠️  For now, the application will use the sample dataset."
+        echo "    Make sure sample_movies.csv exists for basic functionality."
         exit 1
     fi
 fi
@@ -106,7 +130,19 @@ HEADER=$(head -n 1 "$DATASET_FILE")
 if [[ "$HEADER" == *"title_y"* ]] && [[ "$HEADER" == *"overview"* ]] && [[ "$HEADER" == *"genres"* ]]; then
     echo "✅ Dataset format verified!"
     echo ""
-    echo "🎉 Setup complete! You can now start the application:"
+    
+    # Give appropriate success message based on dataset size
+    if [ "$MOVIE_COUNT" -ge 1000 ]; then
+        echo "🎉 Full dataset setup complete with $MOVIE_COUNT movies!"
+        echo "🌟 You now have access to a comprehensive movie collection!"
+    else
+        echo "✅ Sample dataset setup complete with $MOVIE_COUNT movies"
+        echo "📝 Note: This is a limited dataset for testing purposes"
+        echo "   For the full experience, replace with a dataset containing 4000+ movies"
+    fi
+    
+    echo ""
+    echo "🚀 You can now start the application:"
     echo ""
     echo "Backend (Terminal 1):"
     echo "  cd PythonApi"
@@ -115,6 +151,10 @@ if [[ "$HEADER" == *"title_y"* ]] && [[ "$HEADER" == *"overview"* ]] && [[ "$HEA
     echo "Frontend (Terminal 2):"
     echo "  cd web"
     echo "  pnpm dev"
+    echo ""
+    echo "📱 The application will be available at:"
+    echo "  Frontend: http://localhost:3000"
+    echo "  API Docs: http://localhost:8000/swagger"
     echo ""
 else
     echo "❌ Warning: Dataset format may not be compatible"

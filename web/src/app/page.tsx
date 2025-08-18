@@ -73,7 +73,12 @@ function HomePage() {
 
   // Sort movies client-side based on filters
   const sortedMovies = moviesResponse?.items ? [...moviesResponse.items].sort((a, b) => {
-    if (!filters.sortBy) return 0;
+    // Always show favorites first if sorting isn't applied
+    if (!filters.sortBy) {
+      if (a.is_favorite && !b.is_favorite) return -1;
+      if (!a.is_favorite && b.is_favorite) return 1;
+      return a.title.localeCompare(b.title);
+    }
     
     let aValue: string | number, bValue: string | number;
     

@@ -219,7 +219,10 @@ export function MovieFilters({ filters, onFiltersChange, onRefresh, isLoading, c
             <Label className="text-sm font-medium mb-2 block">Sort by</Label>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="w-full justify-between">
+                <Button 
+                  variant={filters.sortBy ? "default" : "outline"} 
+                  className={`w-full justify-between ${filters.sortBy ? 'bg-primary text-primary-foreground' : ''}`}
+                >
                   {filters.sortBy 
                     ? SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label 
                     : 'Default'

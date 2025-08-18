@@ -91,7 +91,7 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
 
   return (
     <Card 
-      className={`movie-card cursor-pointer group relative bg-card/50 backdrop-blur border-2 border-transparent hover:border-primary/20 overflow-hidden ${className}`}
+      className={`movie-card cursor-pointer group relative bg-card/50 backdrop-blur border-2 border-transparent hover:border-primary/20 overflow-hidden h-full flex flex-col ${className}`}
       onClick={handleCardClick}
     >
       {/* Gradient overlay on hover */}
@@ -126,7 +126,7 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
         )}
       </CardHeader>
 
-      <CardContent className="p-4 pt-0 relative z-10">
+      <CardContent className="p-4 pt-0 relative z-10 flex-1">
         <div className="space-y-2">
           <div className="flex items-center gap-4 text-sm text-muted-foreground group-hover:text-foreground/70 transition-colors duration-300">
             <div className="flex items-center gap-1 hover:text-primary transition-colors duration-200">
@@ -180,18 +180,20 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
       </CardContent>
 
       {showActions && (
-        <CardFooter className="p-4 pt-0 relative z-10">
+        <CardFooter className="p-4 pt-0 relative z-10 mt-auto">
           <div className="flex justify-end gap-2 w-full">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleEdit}
-              disabled={isDeleting}
-              className="hover:scale-105 hover:bg-primary/10 hover:border-primary transition-all duration-200"
-            >
-              <Edit className="h-3 w-3 mr-1" />
-              Edit
-            </Button>
+            {!isFavorite && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEdit}
+                disabled={isDeleting}
+                className="hover:scale-105 hover:bg-primary/10 hover:border-primary transition-all duration-200"
+              >
+                <Edit className="h-3 w-3 mr-1" />
+                Edit
+              </Button>
+            )}
             <Button
               variant="destructive"
               size="sm"

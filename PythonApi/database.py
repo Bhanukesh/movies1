@@ -9,16 +9,43 @@ import math
 
 
 class MovieDatabase:
-    def __init__(self, csv_path: str = "../Semantic_Recent.csv"):
+    def __init__(self, csv_path: str = None):
         self._movies: List[Movie] = []
         self._next_id = 1
         self._lock = threading.Lock()
-        self.csv_path = Path(csv_path)
+        
+        # Auto-detect which dataset to use
+        if csv_path:
+            self.csv_path = Path(csv_path)
+        else:
+            # Check if full dataset exists and has been set up
+            full_dataset = Path("../Semantic_Recent.csv")
+            sample_dataset = Path("../sample_movies.csv")
+            
+            if full_dataset.exists() and self._is_full_dataset(full_dataset):
+                self.csv_path = full_dataset
+                print("🎉 Using full dataset with 4800+ movies!")
+            elif sample_dataset.exists():
+                self.csv_path = sample_dataset
+                print("📋 Using sample dataset. Run './setup-dataset.sh' to upgrade to full dataset.")
+            else:
+                self.csv_path = full_dataset  # Fallback
+                print("⚠️  No dataset found. Please run './setup-dataset.sh' to set up the movie database.")
+        
         self._loaded = False
         self._load_chunk_size = 200  # Process 200 rows at a time
         
         # Lazy load - only load when first requested
-        print(f"MovieDatabase initialized. CSV will be loaded on first request.")
+        print(f"MovieDatabase initialized. CSV will be loaded from {self.csv_path} on first request.")
+    
+    def _is_full_dataset(self, csv_path: Path) -> bool:
+        """Check if the CSV file contains the full dataset (1000+ movies)"""
+        try:
+            with open(csv_path, 'r', encoding='latin-1') as f:
+                line_count = sum(1 for line in f) - 1  # Subtract header
+                return line_count >= 1000
+        except Exception:
+            return False
     
     def _ensure_loaded(self):
         """Ensure CSV is loaded (lazy loading)"""

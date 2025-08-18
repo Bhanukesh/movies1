@@ -61,12 +61,21 @@ export function MovieList({
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">
-          Failed to load movies
+        <div className="text-6xl mb-4 animate-bounce-soft">⚠️</div>
+        <h3 className="text-xl font-semibold mb-2 text-destructive">Failed to Load Movies</h3>
+        <p className="text-muted-foreground mb-6 text-center max-w-md">
+          Could not connect to the movie API. Please make sure the backend is running.
         </p>
+        <div className="bg-card/50 backdrop-blur border rounded-lg p-4 mb-6 text-left">
+          <p className="text-sm font-medium mb-2">To start the backend API:</p>
+          <code className="text-sm text-primary">cd PythonApi && python run_app.py</code>
+          <p className="text-xs text-muted-foreground mt-2">
+            The API should be available at http://localhost:8000
+          </p>
+        </div>
         {onRetry && (
-          <Button onClick={onRetry} variant="outline">
-            Try Again
+          <Button onClick={onRetry} variant="outline" className="hover:scale-105 transition-all">
+            🔄 Try Again
           </Button>
         )}
       </div>
@@ -97,12 +106,23 @@ export function MovieList({
           
           <div className="space-y-4 animate-fade-in-delayed">
             <p className="text-sm text-muted-foreground">
-              To get started, make sure you have set up the movie dataset:
+              To get started, make sure you have set up the movie dataset and started the backend:
             </p>
-            <div className="bg-card/50 backdrop-blur border rounded-lg p-4 text-left">
-              <code className="text-sm text-primary">./setup-dataset.sh</code>
-              <p className="text-xs text-muted-foreground mt-2">
-                Run this script to download the movie database
+            <div className="bg-card/50 backdrop-blur border rounded-lg p-4 text-left space-y-3">
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">1. Setup Dataset:</p>
+                <code className="text-sm text-primary">./setup-dataset.sh</code>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">2. Start Backend API:</p>
+                <code className="text-sm text-primary">cd PythonApi && python run_app.py</code>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-muted-foreground mb-1">3. Start Frontend (in another terminal):</p>
+                <code className="text-sm text-primary">cd web && pnpm dev</code>
+              </div>
+              <p className="text-xs text-muted-foreground mt-3">
+                The backend API must be running for movies to load
               </p>
             </div>
             
@@ -201,7 +221,7 @@ export function MovieList({
         {/* Movie Grid/List */}
         <div className={
           viewMode === 'grid' 
-            ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6'
             : 'space-y-4'
         }>
           {sortedMovies.map((movie) => (
