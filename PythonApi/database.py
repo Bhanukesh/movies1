@@ -14,23 +14,11 @@ class MovieDatabase:
         self._next_id = 1
         self._lock = threading.Lock()
         
-        # Auto-detect which dataset to use
+        # Use Semantic_Recent.csv directly
         if csv_path:
             self.csv_path = Path(csv_path)
         else:
-            # Check if full dataset exists and has been set up
-            full_dataset = Path("../Semantic_Recent.csv")
-            sample_dataset = Path("../sample_movies.csv")
-            
-            if full_dataset.exists() and self._is_full_dataset(full_dataset):
-                self.csv_path = full_dataset
-                print("🎉 Using full dataset with 4800+ movies!")
-            elif sample_dataset.exists():
-                self.csv_path = sample_dataset
-                print("📋 Using sample dataset. Run './setup-dataset.sh' to upgrade to full dataset.")
-            else:
-                self.csv_path = full_dataset  # Fallback
-                print("⚠️  No dataset found. Please run './setup-dataset.sh' to set up the movie database.")
+            self.csv_path = Path("../Semantic_Recent.csv")
         
         self._loaded = False
         self._load_chunk_size = 200  # Process 200 rows at a time
