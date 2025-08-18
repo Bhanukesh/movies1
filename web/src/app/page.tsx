@@ -3,6 +3,8 @@
 import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Toaster } from 'sonner';
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 import { useGetMoviesQuery } from '@/store/api';
 import { hydrateFavorites } from '@/store/slices/favorites';
@@ -14,11 +16,19 @@ import { ErrorBoundary } from '@/components/ui/error-boundary';
 
 function HomePage() {
   const dispatch = useDispatch();
-  const { updateUrl } = useUrlSync();
+  const { updateUrl, getFiltersFromUrl } = useUrlSync();
   const [filters, setFilters] = useState<MovieFilters>({
     page: 1,
     size: 20,
   });
+
+  // Initialize filters from URL on mount
+  useEffect(() => {
+    const urlFilters = getFiltersFromUrl();
+    if (Object.keys(urlFilters).length > 0) {
+      setFilters({ page: 1, size: 20, ...urlFilters });
+    }
+  }, [getFiltersFromUrl]);
 
   // Hydrate favorites from localStorage on mount
   useEffect(() => {
@@ -31,10 +41,10 @@ function HomePage() {
     size: filters.size || 20,
     ...(filters.search && { search: filters.search }),
     ...(filters.genres?.length && { genres: filters.genres }),
-    ...(filters.yearFrom && { year_from: filters.yearFrom }),
-    ...(filters.yearTo && { year_to: filters.yearTo }),
-    ...(filters.ratingFrom && { rating_from: filters.ratingFrom }),
-    ...(filters.ratingTo && { rating_to: filters.ratingTo }),
+    ...(filters.yearFrom && { yearFrom: filters.yearFrom }),
+    ...(filters.yearTo && { yearTo: filters.yearTo }),
+    ...(filters.ratingFrom && { ratingFrom: filters.ratingFrom }),
+    ...(filters.ratingTo && { ratingTo: filters.ratingTo }),
   };
 
   const { data: moviesResponse, isLoading, isError, refetch } = useGetMoviesQuery(apiQuery);
@@ -42,6 +52,7 @@ function HomePage() {
   const handleFiltersChange = useCallback((newFilters: MovieFilters) => {
     setFilters(newFilters);
     updateUrl(newFilters, true);
+    // Auto-reload: RTK Query will automatically refetch due to changed parameters
   }, [updateUrl]);
 
   const handlePageChange = useCallback((page: number) => {
@@ -122,6 +133,12 @@ function HomePage() {
                     <span>{moviesResponse.total.toLocaleString()} movies</span>
                   </div>
                 )}
+                <div className="flex items-center gap-2 bg-card/50 backdrop-blur rounded-full px-4 py-2 border">
+                  <RefreshCw className={`w-3 h-3 ${isLoading ? 'animate-spin text-blue-500' : 'text-muted-foreground'}`} />
+                  <span className="text-sm">
+                    {isLoading ? 'Updating...' : 'Auto-sync active'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -135,6 +152,8 @@ function HomePage() {
                 <MovieFiltersComponent
                   filters={filters}
                   onFiltersChange={handleFiltersChange}
+                  onRefresh={refetch}
+                  isLoading={isLoading}
                   className="bg-card/50 backdrop-blur border shadow-lg rounded-xl"
                 />
               </div>

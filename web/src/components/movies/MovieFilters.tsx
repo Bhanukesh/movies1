@@ -1,18 +1,26 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Search, X, SlidersHorizontal, ChevronDown, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { useDebouncedSearch } from '@/hooks/useDebouncedSearch';
 import type { MovieFilters as MovieFiltersType } from '@/hooks/useUrlSync';
 
 interface MovieFiltersProps {
   filters: MovieFiltersType;
   onFiltersChange: (filters: MovieFiltersType) => void;
+  onRefresh?: () => void;
+  isLoading?: boolean;
   className?: string;
 }
 
@@ -29,8 +37,9 @@ const SORT_OPTIONS = [
   { value: 'popularity', label: 'Popularity' },
 ] as const;
 
-export function MovieFilters({ filters, onFiltersChange, className }: MovieFiltersProps) {
+export function MovieFilters({ filters, onFiltersChange, onRefresh, isLoading, className }: MovieFiltersProps) {
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [showAllGenres, setShowAllGenres] = useState(false);
   const filtersRef = useRef(filters);
   
   // Keep ref up to date
@@ -82,7 +91,7 @@ export function MovieFilters({ filters, onFiltersChange, className }: MovieFilte
   const handleSortChange = (sortBy: string) => {
     onFiltersChange({
       ...filters,
-      sortBy: sortBy as MovieFiltersType['sortBy'],
+      sortBy: (sortBy || undefined) as MovieFiltersType['sortBy'],
       page: 1,
     });
   };
@@ -120,6 +129,17 @@ export function MovieFilters({ filters, onFiltersChange, className }: MovieFilte
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg">Filters</CardTitle>
           <div className="flex gap-2">
+            {onRefresh && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={onRefresh}
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+            )}
             <Button
               variant="outline"
               size="sm"
@@ -157,9 +177,21 @@ export function MovieFilters({ filters, onFiltersChange, className }: MovieFilte
 
         {/* Genres */}
         <div>
-          <Label className="text-sm font-medium mb-2 block">Genres</Label>
+          <div className="flex items-center justify-between mb-2">
+            <Label className="text-sm font-medium">Genres</Label>
+            {GENRE_OPTIONS.length > 8 && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowAllGenres(!showAllGenres)}
+                className="text-xs h-6 px-2"
+              >
+                {showAllGenres ? 'Show Less' : `Show All (${GENRE_OPTIONS.length})`}
+              </Button>
+            )}
+          </div>
           <div className="flex flex-wrap gap-2">
-            {GENRE_OPTIONS.slice(0, showAdvanced ? GENRE_OPTIONS.length : 8).map((genre) => {
+            {GENRE_OPTIONS.slice(0, showAllGenres ? GENRE_OPTIONS.length : 8).map((genre) => {
               const isSelected = filters.genres?.includes(genre) || false;
               return (
                 <Badge
@@ -173,24 +205,41 @@ export function MovieFilters({ filters, onFiltersChange, className }: MovieFilte
               );
             })}
           </div>
+          {filters.genres && filters.genres.length > 0 && (
+            <div className="mt-2 text-xs text-muted-foreground">
+              {filters.genres.length} genre{filters.genres.length !== 1 ? 's' : ''} selected
+            </div>
+          )}
         </div>
 
         {/* Sort */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label className="text-sm font-medium mb-2 block">Sort by</Label>
-            <select
-              value={filters.sortBy || ''}
-              onChange={(e) => handleSortChange(e.target.value)}
-              className="w-full p-2 border border-input bg-background rounded-md text-sm"
-            >
-              <option value="">Default</option>
-              {SORT_OPTIONS.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  {filters.sortBy 
+                    ? SORT_OPTIONS.find(opt => opt.value === filters.sortBy)?.label 
+                    : 'Default'
+                  }
+                  <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
+                <DropdownMenuItem onClick={() => handleSortChange('')}>
+                  Default
+                </DropdownMenuItem>
+                {SORT_OPTIONS.map((option) => (
+                  <DropdownMenuItem 
+                    key={option.value} 
+                    onClick={() => handleSortChange(option.value)}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
           
           <div>
