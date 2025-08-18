@@ -91,7 +91,8 @@ export function MovieFilters({ filters, onFiltersChange, onRefresh, isLoading, c
   const handleSortChange = (sortBy: string) => {
     onFiltersChange({
       ...filters,
-      sortBy: (sortBy || undefined) as MovieFiltersType['sortBy'],
+      sortBy: sortBy ? (sortBy as MovieFiltersType['sortBy']) : undefined,
+      sortOrder: sortBy ? (filters.sortOrder || 'asc') : undefined,
       page: 1,
     });
   };
@@ -251,7 +252,7 @@ export function MovieFilters({ filters, onFiltersChange, onRefresh, isLoading, c
               disabled={!filters.sortBy}
               className="w-full"
             >
-              {filters.sortOrder === 'desc' ? '↓ Descending' : '↑ Ascending'}
+              {filters.sortBy ? (filters.sortOrder === 'desc' ? '↓ Descending' : '↑ Ascending') : 'Order'}
             </Button>
           </div>
         </div>

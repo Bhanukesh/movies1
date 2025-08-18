@@ -79,8 +79,8 @@ function HomePage() {
     
     switch (filters.sortBy) {
       case 'title':
-        aValue = a.title;
-        bValue = b.title;
+        aValue = a.title || '';
+        bValue = b.title || '';
         break;
       case 'year':
         aValue = a.release_date ? new Date(a.release_date).getFullYear() : 0;
@@ -98,13 +98,15 @@ function HomePage() {
         return 0;
     }
     
+    const sortOrder = filters.sortOrder || 'asc';
+    
     if (typeof aValue === 'string' && typeof bValue === 'string') {
       const result = aValue.localeCompare(bValue);
-      return filters.sortOrder === 'desc' ? -result : result;
+      return sortOrder === 'desc' ? -result : result;
     }
     
     const result = (aValue as number) - (bValue as number);
-    return filters.sortOrder === 'desc' ? -result : result;
+    return sortOrder === 'desc' ? -result : result;
   }) : [];
 
   return (
