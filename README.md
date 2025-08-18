@@ -49,7 +49,7 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
    ```bash
    ./setup-dataset.sh
    ```
-   > 📋 **Note**: The movie dataset (Semantic_Recent.csv) is not included in the repository. Follow the script instructions to obtain and set up the dataset manually.
+   > 📋 **Note**: The setup script will verify your dataset or guide you through obtaining it if missing.
 
 3. **Start the API** (Terminal 1)
    ```bash
