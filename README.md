@@ -11,7 +11,8 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
 ## ✨ Features
 
 ### 🎬 **Movie Management**
-- **4,808 movies** loaded from comprehensive CSV database
+- **Sample dataset** with 10 popular movies included (Avatar, Dark Knight, etc.)
+- **Expandable to 4,800+ movies** with full dataset
 - **CRUD operations** with real-time updates
 - **Advanced search** across titles, cast, crew, and descriptions
 - **Smart filtering** by genre, year, rating, runtime, and language
@@ -49,7 +50,7 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
    ```bash
    ./setup-dataset.sh
    ```
-   > 📋 **Note**: The setup script will verify your dataset or guide you through obtaining it if missing.
+   > 📋 **Note**: Automatically uses included sample dataset (10 movies). For full dataset (4,800+ movies), see [Dataset Options](#-dataset-options) below.
 
 3. **Start the API** (Terminal 1)
    ```bash
@@ -69,10 +70,29 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
    - **Frontend**: http://localhost:3000
    - **API Documentation**: http://localhost:8000/swagger
 
+### 📊 Dataset Options
+
+The app works immediately with the **included sample dataset** (10 popular movies). For the full experience:
+
+#### Option 1: Use Sample Dataset (Default)
+- ✅ **Included in repository** - no additional setup needed
+- ✅ **Works immediately** after clone
+- 📊 **10 popular movies** (Avatar, Dark Knight, Inception, etc.)
+- 🎯 **Perfect for testing** and development
+
+#### Option 2: Upgrade to Full Dataset
+- 📈 **4,800+ movies** with comprehensive metadata
+- 🔍 **Download from**:
+  - [Kaggle Movie Datasets](https://www.kaggle.com/datasets)
+  - [The Movie Database (TMDB)](https://www.themoviedb.org/)
+  - [MovieLens](https://grouplens.org/datasets/movielens/)
+- 📁 **Replace** `Semantic_Recent.csv` with your downloaded dataset
+- ✅ **Run** `./setup-dataset.sh` to verify format
+
 ## 🏗️ Architecture
 
 ### Backend (FastAPI)
-- **CSV Database**: 4,808 movies from `Semantic_Recent.csv`
+- **CSV Database**: Sample dataset included, expandable to 4,800+ movies
 - **Chunked loading** prevents memory issues and timeouts
 - **RESTful API** with comprehensive filtering and pagination
 - **Auto-generated OpenAPI** documentation

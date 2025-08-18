@@ -9,6 +9,7 @@ echo "======================================"
 # Configuration
 DATASET_URL=""
 DATASET_FILE="Semantic_Recent.csv"
+SAMPLE_DATASET_FILE="sample_movies.csv"
 TEMP_FILE="/tmp/Semantic_Recent.csv"
 
 # Check if dataset already exists
@@ -44,28 +45,44 @@ if [ ! -z "$DATASET_URL" ]; then
         exit 1
     fi
 else
-    # Method 2: Manual setup instructions
-    echo "📋 Manual Dataset Setup Required"
+    # Method 2: Use sample dataset for development
+    echo "📋 Using Sample Dataset for Development"
     echo ""
-    echo "The movie dataset needs to be obtained manually:"
-    echo ""
-    echo "1. 📂 Download or obtain the movie dataset file"
-    echo "2. 🏷️  Ensure it has the following CSV format:"
-    echo "   - title_y, overview, genres, keywords, tagline, cast, crew, etc."
-    echo "3. 📁 Save it as: $DATASET_FILE"
-    echo "4. ✅ Run this script again to verify the setup"
-    echo ""
-    echo "Expected format:"
-    echo "title_y,overview,genres,keywords,tagline,cast,crew,production_companies,..."
-    echo ""
-    echo "The dataset should contain ~4,808 movies with comprehensive metadata."
-    echo ""
-    echo "Popular movie datasets can be found on:"
-    echo "- Kaggle (https://www.kaggle.com/datasets)"
-    echo "- The Movie Database (TMDB)"
-    echo "- MovieLens datasets"
-    echo ""
-    exit 1
+    if [ -f "$SAMPLE_DATASET_FILE" ]; then
+        echo "📂 Found sample dataset: $SAMPLE_DATASET_FILE"
+        echo "🔄 Copying sample dataset to $DATASET_FILE for development..."
+        cp "$SAMPLE_DATASET_FILE" "$DATASET_FILE"
+        echo "✅ Sample dataset setup complete!"
+        echo ""
+        echo "📝 Note: This is a small sample dataset with 10 popular movies."
+        echo "   For production use, obtain a full dataset and replace $DATASET_FILE"
+        echo ""
+        echo "🔍 For full datasets, check:"
+        echo "- Kaggle (https://www.kaggle.com/datasets)"
+        echo "- The Movie Database (TMDB)"
+        echo "- MovieLens datasets"
+        echo ""
+    else
+        echo "❌ Error: Sample dataset not found: $SAMPLE_DATASET_FILE"
+        echo ""
+        echo "The movie dataset needs to be obtained manually:"
+        echo ""
+        echo "1. 📂 Download or obtain the movie dataset file"
+        echo "2. 🏷️  Ensure it has the following CSV format:"
+        echo "   - title_y, overview, genres, keywords, tagline, cast, crew, etc."
+        echo "3. 📁 Save it as: $DATASET_FILE"
+        echo "4. ✅ Run this script again to verify the setup"
+        echo ""
+        echo "Expected format:"
+        echo "title_y,overview,genres,keywords,tagline,cast,crew,production_companies,..."
+        echo ""
+        echo "Popular movie datasets can be found on:"
+        echo "- Kaggle (https://www.kaggle.com/datasets)"
+        echo "- The Movie Database (TMDB)"
+        echo "- MovieLens datasets"
+        echo ""
+        exit 1
+    fi
 fi
 
 # Verify the dataset format

@@ -9,7 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Setup movie dataset (must be run before starting the API)
 ./setup-dataset.sh
 ```
-> **Important**: The movie dataset is not included in git history. Run this script to set up the required CSV file.
+> **Important**: This script automatically uses the included sample dataset (10 movies) for immediate functionality. For full dataset (4,800+ movies), replace `Semantic_Recent.csv` with a comprehensive movie dataset from Kaggle/TMDB/MovieLens.
 
 ### Backend Development
 ```bash
