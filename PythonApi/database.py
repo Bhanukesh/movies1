@@ -14,17 +14,22 @@ class MovieDatabase:
         self._next_id = 1
         self._lock = threading.Lock()
         
-        # Use Semantic_Recent.csv directly
+        # Use chunked data directory for better performance
         if csv_path:
-            self.csv_path = Path(csv_path)
+            self.data_source = Path(csv_path)
+            self.use_chunks = False
         else:
-            self.csv_path = Path("../Semantic_Recent.csv")
+            self.data_source = Path("data_chunks")
+            self.use_chunks = True
         
         self._loaded = False
-        self._load_chunk_size = 200  # Process 200 rows at a time
+        self._load_chunk_size = 200  # Process 200 rows at a time for non-chunked files
         
         # Lazy load - only load when first requested
-        print(f"MovieDatabase initialized. CSV will be loaded from {self.csv_path} on first request.")
+        if self.use_chunks:
+            print(f"MovieDatabase initialized. Chunked CSV data will be loaded from {self.data_source}/ on first request.")
+        else:
+            print(f"MovieDatabase initialized. CSV will be loaded from {self.data_source} on first request.")
     
     def _is_full_dataset(self, csv_path: Path) -> bool:
         """Check if the CSV file contains the full dataset (1000+ movies)"""
@@ -36,7 +41,7 @@ class MovieDatabase:
             return False
     
     def _ensure_loaded(self):
-        """Ensure CSV is loaded (lazy loading)"""
+        """Ensure data is loaded (lazy loading)"""
         if self._loaded:
             return
             
@@ -45,20 +50,73 @@ class MovieDatabase:
                 return
                 
             try:
-                self._load_from_csv_chunked()
+                if self.use_chunks:
+                    self._load_from_chunks()
+                else:
+                    self._load_from_csv_chunked()
                 self._loaded = True
             except Exception as e:
-                print(f"Error loading CSV: {e}")
+                print(f"Error loading data: {e}")
                 self._movies = []
                 self._loaded = True  # Mark as loaded even if failed to prevent retries
     
-    def _load_from_csv_chunked(self):
-        """Load movies from CSV file in chunks to prevent timeouts"""
-        if not self.csv_path.exists():
-            print(f"CSV file not found at {self.csv_path}. Starting with empty database.")
+    def _load_from_chunks(self):
+        """Load movies from chunked CSV files for better performance"""
+        if not self.data_source.exists():
+            print(f"Chunks directory not found at {self.data_source}. Starting with empty database.")
             return
         
-        print(f"Loading movies from {self.csv_path} in chunks...")
+        print(f"Loading movies from chunks in {self.data_source}...")
+        
+        # Find all chunk files
+        chunk_files = sorted(list(self.data_source.glob("movies_chunk_*.csv")))
+        
+        if not chunk_files:
+            print("No chunk files found. Starting with empty database.")
+            return
+        
+        self._movies = []
+        total_loaded = 0
+        
+        for chunk_file in chunk_files:
+            try:
+                print(f"Loading chunk: {chunk_file.name}")
+                
+                # Load chunk with proper encoding
+                chunk_df = pd.read_csv(
+                    chunk_file,
+                    encoding='latin-1',
+                    on_bad_lines='skip',
+                    low_memory=False
+                )
+                
+                # Process each row in the chunk
+                for idx, row in chunk_df.iterrows():
+                    try:
+                        movie_id = total_loaded + 1
+                        movie = Movie.from_csv_row(row.to_dict(), movie_id)
+                        self._movies.append(movie)
+                        total_loaded += 1
+                    except Exception as e:
+                        # Skip problematic rows
+                        continue
+                
+                print(f"  ✅ Loaded {len(chunk_df)} movies from {chunk_file.name}")
+                
+            except Exception as e:
+                print(f"  ❌ Error loading {chunk_file.name}: {e}")
+                continue
+        
+        self._next_id = len(self._movies) + 1
+        print(f"🎉 Successfully loaded {len(self._movies)} movies from {len(chunk_files)} chunks")
+    
+    def _load_from_csv_chunked(self):
+        """Load movies from CSV file in chunks to prevent timeouts"""
+        if not self.data_source.exists():
+            print(f"CSV file not found at {self.data_source}. Starting with empty database.")
+            return
+        
+        print(f"Loading movies from {self.data_source} in chunks...")
         
         # Try different encodings
         encodings = ['latin-1', 'utf-8', 'iso-8859-1', 'cp1252']
@@ -67,7 +125,7 @@ class MovieDatabase:
         for encoding in encodings:
             try:
                 # Test read with first few rows
-                pd.read_csv(self.csv_path, encoding=encoding, nrows=5, on_bad_lines='skip')
+                pd.read_csv(self.data_source, encoding=encoding, nrows=5, on_bad_lines='skip')
                 encoding_used = encoding
                 print(f"Using encoding: {encoding}")
                 break
@@ -83,7 +141,7 @@ class MovieDatabase:
         try:
             # Read CSV in chunks to prevent memory issues
             chunk_reader = pd.read_csv(
-                self.csv_path,
+                self.data_source,
                 encoding=encoding_used,
                 chunksize=self._load_chunk_size,
                 on_bad_lines='skip',
@@ -117,39 +175,10 @@ class MovieDatabase:
             self._next_id = len(self._movies) + 1
     
     def _save_to_csv(self):
-        """Save current movies back to CSV file"""
-        try:
-            with self._lock:
-                # Convert movies to DataFrame format
-                data = []
-                for movie in self._movies:
-                    row = {
-                        "title_y": movie.title,
-                        "overview": movie.overview,
-                        "genres": json.dumps(movie.genres) if movie.genres else "",
-                        "keywords": json.dumps(movie.keywords) if movie.keywords else "",
-                        "tagline": movie.tagline,
-                        "cast": json.dumps(movie.cast) if movie.cast else "",
-                        "crew": json.dumps(movie.crew) if movie.crew else "",
-                        "production_companies": json.dumps(movie.production_companies) if movie.production_companies else "",
-                        "production_countries": json.dumps(movie.production_countries) if movie.production_countries else "",
-                        "spoken_languages": json.dumps(movie.spoken_languages) if movie.spoken_languages else "",
-                        "original_language": movie.original_language,
-                        "original_title": movie.original_title,
-                        "release_date": movie.release_date,
-                        "runtime": movie.runtime,
-                        "vote_average": movie.vote_average,
-                        "vote_count": movie.vote_count,
-                        "popularity": movie.popularity
-                    }
-                    data.append(row)
-                
-                df = pd.DataFrame(data)
-                df.to_csv(self.csv_path, index=False)
-                print(f"Saved {len(self._movies)} movies to CSV")
-        
-        except Exception as e:
-            print(f"Error saving to CSV: {e}")
+        """Save current movies back to storage (chunked or single file)"""
+        # For now, we'll skip saving to preserve original data
+        # In a production system, you'd implement proper persistence
+        print("Note: Saving disabled to preserve original chunked data integrity")
     
     def get_movies_paginated(self, page: int = 1, size: int = 20, filters: Optional[MovieFilters] = None) -> tuple[List[Movie], int]:
         """Get paginated movies with optional filtering"""
@@ -183,7 +212,7 @@ class MovieDatabase:
                    any(crew_member.get("name", "").lower().find(search_term) >= 0 for crew_member in movie.crew)
             ]
         
-        # Genre filter
+        # Genre filter - movie must match ANY selected genres (OR logic)
         if filters.genres:
             filtered = [
                 movie for movie in filtered

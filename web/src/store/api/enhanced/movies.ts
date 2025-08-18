@@ -11,6 +11,10 @@ export const moviesEnhancedApi = moviesApi.injectEndpoints({
         method: 'PUT',
         body: { is_favorite: isFavorite },
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Movie', id },
+        { type: 'Movie', id: 'LIST' },
+      ],
       // Optimistic update
       async onQueryStarted({ id, isFavorite }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
@@ -36,6 +40,10 @@ export const moviesEnhancedApi = moviesApi.injectEndpoints({
           ...(notes !== undefined && { personal_notes: notes })
         },
       }),
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Movie', id },
+        { type: 'Movie', id: 'LIST' },
+      ],
       // Optimistic update
       async onQueryStarted({ id, rating, notes }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(

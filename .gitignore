@@ -383,6 +383,14 @@ MigrationBackup/
 .venv/
 
 # Dataset files - download via setup script instead
-# Allow sample dataset but ignore the main one
-Semantic_Recent.csv
+# Large CSV files should not be committed to git
+*.csv
+Semantic_Recent*.csv
+movies_metadata.csv
+tmdb_*.csv
+# Allow sample dataset but ignore the main one  
 !sample_movies.csv
+# Ignore chunked data directory 
+PythonApi/data_chunks/
+# Backup files
+*.backup

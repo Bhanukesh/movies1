@@ -91,7 +91,7 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
 
   return (
     <Card 
-      className={`movie-card cursor-pointer group relative bg-card/50 backdrop-blur border-2 border-transparent hover:border-primary/20 overflow-hidden h-full flex flex-col ${className}`}
+      className={`movie-card cursor-pointer group relative bg-card/50 backdrop-blur border-2 border-transparent hover:border-primary/20 overflow-hidden h-full flex flex-col min-h-[300px] ${className}`}
       onClick={handleCardClick}
     >
       {/* Gradient overlay on hover */}

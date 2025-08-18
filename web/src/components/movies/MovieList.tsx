@@ -221,7 +221,7 @@ export function MovieList({
         {/* Movie Grid/List */}
         <div className={
           viewMode === 'grid' 
-            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6'
+            ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-6 auto-rows-fr'
             : 'space-y-4'
         }>
           {sortedMovies.map((movie) => (

@@ -4,7 +4,6 @@ import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Toaster } from 'sonner';
 import { RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 import { useGetMoviesQuery } from '@/store/api';
 import { hydrateFavorites } from '@/store/slices/favorites';
