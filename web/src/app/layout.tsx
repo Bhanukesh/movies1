@@ -4,6 +4,7 @@ import "./globals.css";
 
 import ReduxProvider from "@/store/redux-provider";
 import { Navigation } from "@/components/layout/Navigation";
+import { ThemeProvider } from "@/contexts/theme-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,14 +27,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}
       >
-        <ReduxProvider>
-          <Navigation />
-          {children}
-        </ReduxProvider>
+        <ThemeProvider>
+          <ReduxProvider>
+            <Navigation />
+            <div className="transition-colors duration-300">
+              {children}
+            </div>
+          </ReduxProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

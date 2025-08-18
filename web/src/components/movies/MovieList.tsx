@@ -75,21 +75,56 @@ export function MovieList({
 
   if (movies.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-lg text-muted-foreground mb-4">
-          No movies found
-        </p>
-        {showCreateButton && (
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Your First Movie
-          </Button>
-        )}
+      <div className="flex flex-col items-center justify-center py-16 relative">
+        {/* Animated background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-gradient-to-r from-purple-400/20 to-blue-400/20 rounded-full animate-float opacity-30"></div>
+          <div className="absolute top-1/2 right-1/4 w-24 h-24 bg-gradient-to-r from-blue-400/20 to-teal-400/20 rounded-full animate-bounce-soft opacity-40" style={{animationDelay: '1s'}}></div>
+          <div className="absolute bottom-1/4 left-1/3 w-20 h-20 bg-gradient-to-r from-teal-400/20 to-purple-400/20 rounded-full animate-float opacity-20" style={{animationDelay: '2s'}}></div>
+        </div>
+        
+        {/* Main content */}
+        <div className="relative z-10 text-center max-w-md">
+          <div className="mb-8 animate-fade-in">
+            <div className="text-8xl mb-4 animate-bounce-soft">🎬</div>
+            <h2 className="text-3xl font-bold mb-2 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              Your Movie Journey Starts Here!
+            </h2>
+            <p className="text-lg text-muted-foreground mb-6 animate-slide-up">
+              No movies in your collection yet? Let&apos;s fix that! 🍿
+            </p>
+          </div>
+          
+          <div className="space-y-4 animate-fade-in-delayed">
+            <p className="text-sm text-muted-foreground">
+              To get started, make sure you have set up the movie dataset:
+            </p>
+            <div className="bg-card/50 backdrop-blur border rounded-lg p-4 text-left">
+              <code className="text-sm text-primary">./setup-dataset.sh</code>
+              <p className="text-xs text-muted-foreground mt-2">
+                Run this script to download the movie database
+              </p>
+            </div>
+            
+            {showCreateButton && (
+              <div className="pt-4">
+                <Button 
+                  onClick={() => setShowCreateForm(true)}
+                  className="hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                  size="lg"
+                >
+                  <Plus className="mr-2 h-5 w-5 animate-pulse" />
+                  Add Your First Movie
+                </Button>
+              </div>
+            )}
+          </div>
+        </div>
         
         {showCreateForm && (
-          <div className="mt-8 w-full max-w-2xl">
-            <div className="bg-background border rounded-lg p-6">
-              <h3 className="text-lg font-semibold mb-4">Create New Movie</h3>
+          <div className="mt-12 w-full max-w-2xl animate-fade-in">
+            <div className="bg-card/80 backdrop-blur border rounded-xl p-8 shadow-2xl">
+              <h3 className="text-xl font-semibold mb-6 text-center">✨ Create Your First Movie Entry</h3>
               <MovieForm
                 onSuccess={handleCreateSuccess}
                 onCancel={() => setShowCreateForm(false)}

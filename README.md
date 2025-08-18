@@ -24,6 +24,8 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
 - **Sorting** by title, year, rating, or popularity
 
 ### ⭐ **User Experience**
+- **Light/Dark mode** with system preference detection
+- **Smooth animations** and micro-interactions
 - **Favorites system** with localStorage persistence
 - **Responsive design** for all device sizes
 - **Loading states** and error handling
@@ -43,21 +45,27 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
    cd movies1
    ```
 
-2. **Start the API** (Terminal 1)
+2. **Setup the movie dataset**
+   ```bash
+   ./setup-dataset.sh
+   ```
+   > 📋 **Note**: The movie dataset (Semantic_Recent.csv) is not included in the repository. Follow the script instructions to obtain and set up the dataset manually.
+
+3. **Start the API** (Terminal 1)
    ```bash
    cd PythonApi
    pip install -r requirements.txt
    python run_app.py
    ```
 
-3. **Start the frontend** (Terminal 2)
+4. **Start the frontend** (Terminal 2)
    ```bash
    cd web
    pnpm install
    pnpm dev
    ```
 
-4. **Access the application**
+5. **Access the application**
    - **Frontend**: http://localhost:3000
    - **API Documentation**: http://localhost:8000/swagger
 
@@ -71,6 +79,8 @@ A full-stack movie management application with **Next.js 15**, **FastAPI**, and 
 
 ### Frontend (Next.js)
 - **App Router** with Server Components
+- **Theme system** with light/dark/system modes
+- **Animated UI** with custom CSS animations and transitions
 - **RTK Query** for API state management
 - **Redux Toolkit** for local state (favorites)
 - **Zod validation** with React Hook Form
@@ -97,23 +107,27 @@ movies1/
 │   └── requirements.txt   # Dependencies
 ├── web/                   # Next.js frontend
 │   ├── src/app/          # App Router pages
-│   ├── src/components/   # UI components
+│   ├── src/components/   # UI components (enhanced with animations)
+│   ├── src/contexts/     # Theme context for light/dark mode
 │   ├── src/store/        # Redux + RTK Query
 │   └── package.json      # Dependencies
-├── Semantic_Recent.csv    # Movie database (4,808 movies)
+├── setup-dataset.sh       # Dataset setup script
 └── README.md             # This file
 ```
 
 ## 🎯 Key Features Implemented
 
-✅ **Full-text search** across 4,808 movies  
+✅ **Full-text search** across movies database  
 ✅ **Advanced filtering** with 12+ filter criteria  
 ✅ **Real-time pagination** with configurable page sizes  
+✅ **Light/Dark theme** with system preference detection  
+✅ **Smooth animations** and micro-interactions  
 ✅ **Favorites management** with local persistence  
 ✅ **Personal ratings** and notes system  
 ✅ **Responsive UI** with loading states and error handling  
 ✅ **Type-safe** API integration with auto-generated client  
 ✅ **URL synchronization** for shareable search results  
+✅ **Dataset management** with setup script  
 
 ## 🔧 Development
 

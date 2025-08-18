@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, Suspense, useMemo, useCallback } from 'react';
+import { useEffect, useState, Suspense, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import { Toaster } from 'sonner';
 
@@ -98,50 +98,86 @@ function HomePage() {
 
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 transition-all duration-500">
         <Toaster richColors position="top-right" />
         
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold mb-2">Movie Collection</h1>
-            <p className="text-muted-foreground">
-              Discover, organize, and rate your favorite movies
-            </p>
+        {/* Hero Section */}
+        <div className="relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/5 to-teal-500/10 animate-gradient-x"></div>
+          <div className="relative container mx-auto px-4 py-16">
+            <div className="text-center mb-12 animate-fade-in">
+              <h1 className="text-6xl md:text-8xl font-black mb-6 bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 bg-clip-text text-transparent animate-pulse">
+                🎬 Movie Magic
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground mb-8 animate-slide-up">
+                Discover, organize, and rate your favorite cinematic adventures
+              </p>
+              <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground animate-fade-in-delayed">
+                <div className="flex items-center gap-2 bg-card/50 backdrop-blur rounded-full px-4 py-2 border">
+                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+                  <span>Ready to explore</span>
+                </div>
+                {moviesResponse?.total && (
+                  <div className="flex items-center gap-2 bg-card/50 backdrop-blur rounded-full px-4 py-2 border">
+                    <span>{moviesResponse.total.toLocaleString()} movies</span>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
+        </div>
 
+        <div className="container mx-auto px-4 pb-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             {/* Filters Sidebar */}
             <div className="lg:col-span-1">
-              <MovieFiltersComponent
-                filters={filters}
-                onFiltersChange={handleFiltersChange}
-                className="sticky top-8"
-              />
+              <div className="sticky top-8 transform transition-all duration-300 hover:scale-[1.01]">
+                <MovieFiltersComponent
+                  filters={filters}
+                  onFiltersChange={handleFiltersChange}
+                  className="bg-card/50 backdrop-blur border shadow-lg rounded-xl"
+                />
+              </div>
             </div>
 
             {/* Main Content */}
             <div className="lg:col-span-3 space-y-6">
-              <MovieList
-                movies={sortedMovies}
-                isLoading={isLoading}
-                isError={isError}
-                onRetry={refetch}
-                showCreateButton={true}
-              />
+              <div className="transform transition-all duration-300">
+                <MovieList
+                  movies={sortedMovies}
+                  isLoading={isLoading}
+                  isError={isError}
+                  onRetry={refetch}
+                  showCreateButton={true}
+                />
+              </div>
 
               {/* Pagination */}
               {moviesResponse && moviesResponse.pages > 1 && (
-                <Pagination
-                  currentPage={moviesResponse.page}
-                  totalPages={moviesResponse.pages}
-                  totalItems={moviesResponse.total}
-                  pageSize={moviesResponse.size}
-                  onPageChange={handlePageChange}
-                  onPageSizeChange={handlePageSizeChange}
-                />
+                <div className="flex justify-center transform transition-all duration-300 hover:scale-105">
+                  <Pagination
+                    currentPage={moviesResponse.page}
+                    totalPages={moviesResponse.pages}
+                    totalItems={moviesResponse.total}
+                    pageSize={moviesResponse.size}
+                    onPageChange={handlePageChange}
+                    onPageSizeChange={handlePageSizeChange}
+                  />
+                </div>
               )}
             </div>
           </div>
+        </div>
+
+        {/* Floating Action Elements */}
+        <div className="fixed bottom-8 right-8 flex flex-col gap-4">
+          {/* Scroll to top button */}
+          <button
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="w-12 h-12 rounded-full bg-primary/80 backdrop-blur text-primary-foreground shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 flex items-center justify-center"
+          >
+            ↑
+          </button>
         </div>
       </div>
     </ErrorBoundary>

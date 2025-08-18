@@ -91,45 +91,55 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
 
   return (
     <Card 
-      className={`cursor-pointer transition-all hover:shadow-lg ${className}`}
+      className={`movie-card cursor-pointer group relative bg-card/50 backdrop-blur border-2 border-transparent hover:border-primary/20 overflow-hidden ${className}`}
       onClick={handleCardClick}
     >
-      <CardHeader className="p-4">
+      {/* Gradient overlay on hover */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      
+      {/* Animated border glow */}
+      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+      
+      <CardHeader className="p-4 relative z-10">
         <div className="flex justify-between items-start gap-2">
-          <h3 className="font-semibold text-lg line-clamp-2 flex-1">
+          <h3 className="font-semibold text-lg line-clamp-2 flex-1 group-hover:text-primary transition-colors duration-300">
             {movie.title}
           </h3>
           <Button
             variant="ghost"
             size="sm"
             onClick={handleFavoriteToggle}
-            className={`shrink-0 ${isFavorite ? 'text-red-500 hover:text-red-600' : 'text-gray-400 hover:text-red-500'}`}
+            className={`shrink-0 transform hover:scale-110 transition-all duration-200 ${
+              isFavorite 
+                ? 'text-red-500 hover:text-red-600 animate-pulse' 
+                : 'text-gray-400 hover:text-red-500'
+            }`}
           >
-            <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current' : ''}`} />
+            <Heart className={`h-4 w-4 ${isFavorite ? 'fill-current animate-bounce-soft' : ''}`} />
           </Button>
         </div>
         
         {movie.overview && (
-          <p className="text-sm text-muted-foreground line-clamp-3">
+          <p className="text-sm text-muted-foreground line-clamp-3 group-hover:text-foreground/80 transition-colors duration-300">
             {movie.overview}
           </p>
         )}
       </CardHeader>
 
-      <CardContent className="p-4 pt-0">
+      <CardContent className="p-4 pt-0 relative z-10">
         <div className="space-y-2">
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <div className="flex items-center gap-1">
+          <div className="flex items-center gap-4 text-sm text-muted-foreground group-hover:text-foreground/70 transition-colors duration-300">
+            <div className="flex items-center gap-1 hover:text-primary transition-colors duration-200">
               <Calendar className="h-3 w-3" />
               {formatYear(movie.release_date)}
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 hover:text-primary transition-colors duration-200">
               <Clock className="h-3 w-3" />
               {formatRuntime(movie.runtime)}
             </div>
             {movie.vote_average && (
-              <div className="flex items-center gap-1">
-                <Star className="h-3 w-3 text-yellow-500" />
+              <div className="flex items-center gap-1 hover:text-yellow-500 transition-colors duration-200">
+                <Star className="h-3 w-3 text-yellow-500 group-hover:animate-pulse" />
                 {movie.vote_average.toFixed(1)}
               </div>
             )}
@@ -138,12 +148,19 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
           {movie.genres && movie.genres.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {movie.genres.slice(0, 3).map((genre, index) => (
-                <Badge key={index} variant="secondary" className="text-xs">
+                <Badge 
+                  key={index} 
+                  variant="secondary" 
+                  className="text-xs hover:bg-primary/20 hover:text-primary transition-all duration-200 transform hover:scale-105"
+                >
                   {typeof genre === 'string' ? genre : (genre as { name: string }).name}
                 </Badge>
               ))}
               {movie.genres.length > 3 && (
-                <Badge variant="outline" className="text-xs">
+                <Badge 
+                  variant="outline" 
+                  className="text-xs hover:border-primary hover:text-primary transition-all duration-200 transform hover:scale-105"
+                >
                   +{movie.genres.length - 3}
                 </Badge>
               )}
@@ -151,8 +168,8 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
           )}
 
           {movie.personal_rating && (
-            <div className="flex items-center gap-1 text-sm">
-              <Star className="h-3 w-3 text-blue-500 fill-current" />
+            <div className="flex items-center gap-1 text-sm group-hover:scale-105 transition-transform duration-200">
+              <Star className="h-3 w-3 text-blue-500 fill-current animate-float" />
               <span className="text-blue-600 font-medium">
                 {movie.personal_rating}/10
               </span>
@@ -163,13 +180,14 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
       </CardContent>
 
       {showActions && (
-        <CardFooter className="p-4 pt-0">
+        <CardFooter className="p-4 pt-0 relative z-10">
           <div className="flex justify-end gap-2 w-full">
             <Button
               variant="outline"
               size="sm"
               onClick={handleEdit}
               disabled={isDeleting}
+              className="hover:scale-105 hover:bg-primary/10 hover:border-primary transition-all duration-200"
             >
               <Edit className="h-3 w-3 mr-1" />
               Edit
@@ -179,8 +197,9 @@ export function MovieCard({ movie, onEdit, showActions = true, className }: Movi
               size="sm"
               onClick={handleDelete}
               disabled={isDeleting}
+              className="hover:scale-105 transition-all duration-200 disabled:animate-pulse"
             >
-              <Trash2 className="h-3 w-3 mr-1" />
+              <Trash2 className={`h-3 w-3 mr-1 ${isDeleting ? 'animate-spin' : ''}`} />
               {isDeleting ? 'Deleting...' : 'Delete'}
             </Button>
           </div>

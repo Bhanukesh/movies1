@@ -381,3 +381,7 @@ MigrationBackup/
 
 # Ignore Python virtual environments
 .venv/
+
+# Dataset files - download via setup script instead
+*.csv
+Semantic_Recent.csv

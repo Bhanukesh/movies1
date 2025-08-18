@@ -4,6 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
+### Dataset Setup (Required First)
+```bash
+# Setup movie dataset (must be run before starting the API)
+./setup-dataset.sh
+```
+> **Important**: The movie dataset is not included in git history. Run this script to set up the required CSV file.
+
 ### Backend Development
 ```bash
 # Build the entire solution
@@ -14,6 +21,16 @@ dotnet run --project AppHost
 
 # Run API service individually
 dotnet run --project ApiService
+```
+
+### Python API Development
+```bash
+# Install Python dependencies
+cd PythonApi
+pip install -r requirements.txt
+
+# Start Python API server
+python run_app.py
 ```
 
 ### Frontend Development
