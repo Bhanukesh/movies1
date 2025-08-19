@@ -50,14 +50,16 @@ function HomePage() {
 
   const handleFiltersChange = useCallback((newFilters: MovieFilters) => {
     setFilters(newFilters);
-    updateUrl(newFilters, true);
+    // Schedule URL update for next tick to avoid setState during render
+    setTimeout(() => updateUrl(newFilters, true), 0);
     // Auto-reload: RTK Query will automatically refetch due to changed parameters
   }, [updateUrl]);
 
   const handlePageChange = useCallback((page: number) => {
     setFilters(current => {
       const newFilters = { ...current, page };
-      updateUrl(newFilters, true);
+      // Schedule URL update for next tick to avoid setState during render
+      setTimeout(() => updateUrl(newFilters, true), 0);
       return newFilters;
     });
   }, [updateUrl]);
@@ -65,7 +67,8 @@ function HomePage() {
   const handlePageSizeChange = useCallback((size: number) => {
     setFilters(current => {
       const newFilters = { ...current, size, page: 1 };
-      updateUrl(newFilters, true);
+      // Schedule URL update for next tick to avoid setState during render
+      setTimeout(() => updateUrl(newFilters, true), 0);
       return newFilters;
     });
   }, [updateUrl]);
