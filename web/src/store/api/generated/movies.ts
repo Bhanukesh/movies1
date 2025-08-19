@@ -22,13 +22,6 @@ const injectedRtkApi = api.injectEndpoints({
           personal_rating_to: queryArg.personalRatingTo,
         },
       }),
-      providesTags: (result) =>
-        result
-          ? [
-              ...result.items.map(({ id }) => ({ type: 'Movie' as const, id })),
-              { type: 'Movie', id: 'LIST' },
-            ]
-          : [{ type: 'Movie', id: 'LIST' }],
     }),
     createMovie: build.mutation<CreateMovieApiResponse, CreateMovieApiArg>({
       query: (queryArg) => ({
@@ -36,7 +29,6 @@ const injectedRtkApi = api.injectEndpoints({
         method: "POST",
         body: queryArg.createMovieCommand,
       }),
-      invalidatesTags: [{ type: 'Movie', id: 'LIST' }],
     }),
     searchMovies: build.query<SearchMoviesApiResponse, SearchMoviesApiArg>({
       query: (queryArg) => ({
@@ -62,7 +54,6 @@ const injectedRtkApi = api.injectEndpoints({
     }),
     getMovie: build.query<GetMovieApiResponse, GetMovieApiArg>({
       query: (queryArg) => ({ url: `/api/Movies/${queryArg.id}` }),
-      providesTags: (result, error, { id }) => [{ type: 'Movie', id }],
     }),
     updateMovie: build.mutation<UpdateMovieApiResponse, UpdateMovieApiArg>({
       query: (queryArg) => ({
@@ -70,20 +61,12 @@ const injectedRtkApi = api.injectEndpoints({
         method: "PUT",
         body: queryArg.updateMovieCommand,
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: 'Movie', id },
-        { type: 'Movie', id: 'LIST' },
-      ],
     }),
     deleteMovie: build.mutation<DeleteMovieApiResponse, DeleteMovieApiArg>({
       query: (queryArg) => ({
         url: `/api/Movies/${queryArg.id}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, { id }) => [
-        { type: 'Movie', id },
-        { type: 'Movie', id: 'LIST' },
-      ],
     }),
   }),
   overrideExisting: false,

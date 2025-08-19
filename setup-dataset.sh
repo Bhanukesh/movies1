@@ -36,7 +36,39 @@ if [ -d "$CHUNKS_DIR" ] && [ "$(ls -A $CHUNKS_DIR 2>/dev/null)" ]; then
     fi
 fi
 
-# Option 2: Create comprehensive movie database
+# Check for additional CSV files first
+echo "🔍 Checking for additional CSV files..."
+
+# Use find with proper handling of spaces
+mkdir -p "$CHUNKS_DIR"
+cd "$CHUNKS_DIR"
+
+# Look for CSV files and process them
+if find .. -maxdepth 1 -name "*.csv" -type f | head -1 | grep -q .; then
+    echo "✅ Found additional CSV files to process:"
+    find .. -maxdepth 1 -name "*.csv" -type f | while read -r csv_file; do
+        echo "   • $csv_file"
+        echo "📊 Processing $(basename "$csv_file")..."
+        python3 ../chunk_csv.py "$csv_file"
+    done
+    
+    cd - > /dev/null
+    
+    echo "✅ Additional CSV files processed!"
+    
+    # Check total movies
+    if [ -f "$CHUNKS_DIR/metadata.json" ]; then
+        TOTAL_ROWS=$(grep -o '"total_rows": [0-9]*' "$CHUNKS_DIR/metadata.json" | grep -o '[0-9]*')
+        if [ "$TOTAL_ROWS" -gt 1000 ]; then
+            echo "🎉 Dataset ready with $TOTAL_ROWS movies!"
+            exit 0
+        fi
+    fi
+else
+    cd - > /dev/null
+fi
+
+# Option 2: Create comprehensive movie database (fallback)
 echo "📊 Creating comprehensive movie database with 1000+ movies..."
 
 mkdir -p "$CHUNKS_DIR"

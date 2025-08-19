@@ -81,8 +81,14 @@ def chunk_csv_file(input_file: str, chunk_size: int = 1000, output_dir: str = "d
         return False
 
 def main():
+    import sys
+    
     # Configuration
-    input_csv = "../Semantic_Recent.csv"  # The renamed file
+    if len(sys.argv) > 1:
+        input_csv = sys.argv[1]  # Use provided file path
+    else:
+        input_csv = "../Semantic_Recent.csv"  # Default fallback
+    
     chunk_size = 1000  # 1000 movies per chunk
     output_directory = "data_chunks"
     
